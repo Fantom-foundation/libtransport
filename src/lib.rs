@@ -10,7 +10,7 @@ use std::sync::mpsc::Sender;
 //
 // Data - Transmitting data type;
 // it can be a truct containing message type and payload data
-pub trait Transport<Address, Data>
+pub trait Transport<Address, Data>: AddressService<Address>
 where
     Data: AsRef<u8>,
 {
@@ -31,6 +31,14 @@ where
     // Several channels can be registered, they will be pushed in
     // the order of registration.
     fn register_channel(&mut self, sender: Sender<Data>) -> Result<()>;
+}
+
+// Address service trait provides translation from external addresses (e.g. PeerId)
+// into internal addresses used by transport layer (e.g. 'IP:port')
+pub trait AddressService<Address> {
+    // type of internal address; e.g. 'IP:port'
+    type IntAddress;
+    fn net_address(external: Address) -> Result<Self::IntAddress>;
 }
 
 mod errors;
