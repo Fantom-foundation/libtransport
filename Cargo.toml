@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 fantom-common-rs = { git = "https://github.com/Fantom-foundation/fantom-common-rs" }
+serde = "1.0.97"

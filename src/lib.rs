@@ -1,4 +1,5 @@
 use crate::errors::Result;
+use serde::{Deserialize, Serialize};
 use std::sync::mpsc::Sender;
 
 // Transport trait for various implementations of message
@@ -10,7 +11,7 @@ use std::sync::mpsc::Sender;
 // it can be a truct containing message type and payload data
 pub trait Transport<Data>
 where
-    Data: AsRef<u8>,
+    Data: AsRef<u8> + Serialize,
 {
     // transport configuration type
     type Configuration;
