@@ -4,13 +4,11 @@ use std::sync::mpsc::Sender;
 // Transport trait for various implementations of message
 // sending/receiving services
 //
-// Address - external address type; e.g. PeerId for Consensus.
-// Translation into internal addresses is done in the implementation
-// based on configuration supplied, or based on implementation's internal data
+// peer_address - network address of the peer; e.g. "IP:port".
 //
 // Data - Transmitting data type;
 // it can be a truct containing message type and payload data
-pub trait Transport<Address, Data>: AddressService<Address>
+pub trait Transport<Data>
 where
     Data: AsRef<u8>,
 {
@@ -21,9 +19,12 @@ where
     fn new(cfg: Self::Configuration) -> Self;
 
     // send specified message to the specified peer
-    fn send(&mut self, peer: &Address, data: Data) -> Result<()>;
+    fn send(&mut self, peer_address: String, data: Data) -> Result<()>;
 
     // broadcast specified message to all peers
+    // NB: broadcast effectivelly possible via this call only if underlying
+    // implementation allowing it, e.g. broadcasting within IP network.
+    // Otherwise create a macro that calls send() above for every member of peer list.
     fn broadcast(&mut self, data: Data) -> Result<()>;
 
     // register a sending-half of std::sync::mpsc::channel which is used to push
@@ -31,14 +32,6 @@ where
     // Several channels can be registered, they will be pushed in
     // the order of registration.
     fn register_channel(&mut self, sender: Sender<Data>) -> Result<()>;
-}
-
-// Address service trait provides translation from external addresses (e.g. PeerId)
-// into internal addresses used by transport layer (e.g. 'IP:port')
-pub trait AddressService<Address> {
-    // type of internal address; e.g. 'IP:port'
-    type IntAddress;
-    fn net_address(external: Address) -> Result<Self::IntAddress>;
 }
 
 mod errors;
