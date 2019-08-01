@@ -1,4 +1,4 @@
-use crate::errors::{Error, Result};
+use crate::errors::Result;
 use libcommon_rs::peer::{PeerId, PeerList};
 use serde::{Deserialize, Serialize};
 use std::sync::mpsc::Sender;
@@ -10,7 +10,7 @@ use std::sync::mpsc::Sender;
 //
 // Data - Transmitting data type;
 // it can be a truct containing message type and payload data
-pub trait Transport<Id, Peer, Data>
+pub trait Transport<Id, Peer, Data, Error>
 where
     Data: AsRef<u8> + Serialize,
     Id: PeerId,
