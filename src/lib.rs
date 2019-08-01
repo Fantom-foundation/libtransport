@@ -1,4 +1,5 @@
-use crate::errors::Result;
+use crate::errors::{Error, Result};
+use libcommon_rs::peer::{PeerId, PeerList};
 use serde::{Deserialize, Serialize};
 use std::sync::mpsc::Sender;
 
@@ -9,9 +10,10 @@ use std::sync::mpsc::Sender;
 //
 // Data - Transmitting data type;
 // it can be a truct containing message type and payload data
-pub trait Transport<Data>
+pub trait Transport<Id, Peer, Data>
 where
     Data: AsRef<u8> + Serialize,
+    Id: PeerId,
 {
     // transport configuration type
     type Configuration;
@@ -26,7 +28,7 @@ where
     // NB: broadcast effectivelly possible via this call only if underlying
     // implementation allowing it, e.g. broadcasting within IP network.
     // Otherwise create a macro that calls send() above for every member of peer list.
-    fn broadcast(&mut self, data: Data) -> Result<()>;
+    fn broadcast(&mut self, peers: dyn PeerList<Id, Error, Item = Peer>, data: Data) -> Result<()>;
 
     // register a sending-half of std::sync::mpsc::channel which is used to push
     // all received messages to.
