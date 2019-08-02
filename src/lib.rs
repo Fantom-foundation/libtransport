@@ -10,10 +10,11 @@ use std::sync::mpsc::Sender;
 //
 // Data - Transmitting data type;
 // it can be a truct containing message type and payload data
-pub trait Transport<Id, Peer, Data, Error>
+pub trait Transport<Id, Peer, Data, Error, Pl>
 where
     Data: AsRef<u8> + Serialize,
     Id: PeerId,
+    Pl: PeerList<Id, Error, Item = Peer>,
 {
     // transport configuration type
     type Configuration;
@@ -25,11 +26,7 @@ where
     fn send(&mut self, peer_address: String, data: Data) -> Result<()>;
 
     // broadcast specified message to all peers
-    // NB: broadcast effectivelly possible via this call only if underlying
-    // implementation allowing it, e.g. broadcasting within IP network.
-    // Otherwise create a macro that calls send() above for every member of peer list.
-    fn broadcast(&mut self, peers: &dyn PeerList<Id, Error, Item = Peer>, data: Data)
-        -> Result<()>;
+    fn broadcast(&mut self, peers: &Pl, data: Data) -> Result<()>;
 
     // register a sending-half of std::sync::mpsc::channel which is used to push
     // all received messages to.
