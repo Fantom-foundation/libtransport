@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 libcommon-rs = { git = "https://github.com/Fantom-foundation/libcommon-rs" }
 serde = "1.0.97"
+bincode = "1.0.1"
