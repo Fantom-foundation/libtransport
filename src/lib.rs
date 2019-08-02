@@ -37,7 +37,7 @@ where
     fn register_channel(&mut self, sender: Sender<Data>) -> Result<()>;
 }
 
-mod errors;
+pub mod errors;
 
 #[cfg(test)]
 mod tests {

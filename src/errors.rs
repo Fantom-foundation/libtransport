@@ -14,3 +14,10 @@ impl From<BaseError> for Error {
         Error::Base(be)
     }
 }
+
+#[macro_export]
+macro_rules! none_error {
+    () => {
+        libtransport::errors::Error::Base(fantom_common_rs::errors::Error::NoneError)
+    };
+}
