@@ -28,7 +28,8 @@ where
     // NB: broadcast effectivelly possible via this call only if underlying
     // implementation allowing it, e.g. broadcasting within IP network.
     // Otherwise create a macro that calls send() above for every member of peer list.
-    fn broadcast(&mut self, peers: dyn PeerList<Id, Error, Item = Peer>, data: Data) -> Result<()>;
+    fn broadcast(&mut self, peers: &dyn PeerList<Id, Error, Item = Peer>, data: Data)
+        -> Result<()>;
 
     // register a sending-half of std::sync::mpsc::channel which is used to push
     // all received messages to.
