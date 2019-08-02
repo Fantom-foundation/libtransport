@@ -26,7 +26,7 @@ where
     fn send(&mut self, peer_address: String, data: Data) -> Result<()>;
 
     // broadcast specified message to all peers
-    fn broadcast(&mut self, peers: &Pl, data: Data) -> Result<()>;
+    fn broadcast(&mut self, peers: &mut Pl, data: Data) -> Result<()>;
 
     // register a sending-half of std::sync::mpsc::channel which is used to push
     // all received messages to.
