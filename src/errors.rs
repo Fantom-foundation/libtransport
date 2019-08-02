@@ -5,9 +5,12 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug)]
 pub enum Error {
     Base(BaseError),
+    // Indicating a vector reached max capacity and can not receive new element
     AtMaxVecCapacity,
     Bincode(bincode::Error),
     Io(std::io::Error),
+    // Indicating read/write operation was unable to read/write complete size of data
+    Incomplete,
 }
 
 impl From<BaseError> for Error {
