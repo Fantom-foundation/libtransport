@@ -1,4 +1,6 @@
 use libcommon_rs::errors::Error as BaseError;
+use std::error::Error as StdError;
+use std::sync::{MutexGuard, PoisonError};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -11,6 +13,7 @@ pub enum Error {
     Io(std::io::Error),
     // Indicating read/write operation was unable to read/write complete size of data
     Incomplete,
+    PoisonError(String),
 }
 
 impl From<BaseError> for Error {
@@ -31,6 +34,12 @@ impl From<std::io::Error> for Error {
     #[inline]
     fn from(io_error: std::io::Error) -> Error {
         Error::Io(io_error)
+    }
+}
+
+impl<'a, T> From<PoisonError<MutexGuard<'a, T>>> for Error {
+    fn from(e: PoisonError<MutexGuard<'a, T>>) -> Error {
+        Error::PoisonError(e.description().to_string())
     }
 }
 
