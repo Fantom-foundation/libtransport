@@ -4,6 +4,15 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::sync::mpsc::Sender;
 
+// Transport configurtatiion trait
+pub trait TransportConfiguration<Data> {
+    // register a sending-half of std::sync::mpsc::channel which is used to push
+    // all received messages to.
+    // Several channels can be registered, they will be pushed in
+    // the order of registration.
+    fn register_channel(&mut self, sender: Sender<Data>) -> Result<()>;
+}
+
 // Transport trait for various implementations of message
 // sending/receiving services
 //
@@ -20,7 +29,7 @@ where
     Pl: PeerList<Id, Error>,
 {
     // transport configuration type
-    type Configuration;
+    type Configuration: TransportConfiguration<Data>;
 
     // Create new Transport instance
     fn new(cfg: Self::Configuration) -> Self;
