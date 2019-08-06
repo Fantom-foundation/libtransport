@@ -22,7 +22,7 @@ pub trait TransportConfiguration<Data> {
 // Data - Transmitting data type;
 // Error - error type returned by methods of Pl: PeerList
 // it can be a truct containing message type and payload data
-pub trait Transport<Id, Data, Error, Pl>
+pub trait Transport<Id, Data, Error, Pl>: Drop
 where
     Data: AsRef<u8> + Serialize + DeserializeOwned,
     Id: PeerId,
