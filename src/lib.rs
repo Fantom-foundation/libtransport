@@ -12,6 +12,8 @@ pub trait TransportConfiguration<Data> {
     // Several channels can be registered, they will be pushed in
     // the order of registration.
     fn register_channel(&mut self, sender: Sender<Data>) -> Result<()>;
+    // set bind network address for incoming messages listener
+    fn set_bind_net_addr(&mut self, address: String) -> Result<()>;
 }
 
 // Transport trait for various implementations of message
@@ -53,7 +55,7 @@ pub mod errors;
 #[cfg(test)]
 mod tests {
     use super::errors::{Error, Error::AtMaxVecCapacity, Result};
-    use super::Transport;
+    use super::{Transport, TransportConfiguration};
     use core::slice::{Iter, IterMut};
     use libcommon_rs::peer::{Peer, PeerId, PeerList};
     use serde::{Deserialize, Serialize};
@@ -105,7 +107,13 @@ mod tests {
         }
     }
 
-    fn CommonTest<T: Transport<Id, Data, Error, TestPeerList<Id>>>() {}
+    fn CommonTest<
+        T: Transport<Id, Data, Error, TestPeerList<Id>>,
+        C: TransportConfiguration<Data>,
+    >(
+        net_addrs: Vec<String>,
+    ) {
+    }
 
     #[test]
     fn it_works() {
