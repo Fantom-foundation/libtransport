@@ -54,7 +54,7 @@ pub mod errors;
 mod tests {
     use super::errors::{Error, Error::AtMaxVecCapacity, Result};
     use super::Transport;
-    use core::slice::Iter;
+    use core::slice::{Iter, IterMut};
     use libcommon_rs::peer::{Peer, PeerId, PeerList};
     use serde::{Deserialize, Serialize};
 
@@ -97,9 +97,11 @@ mod tests {
             // Stub not used in tests to satisfy PeerList trait
             Ok(())
         }
-        //        type IterType<'x> = IterTestPeerList<'x, TestPeerList<Id>>;
         fn iter(&self) -> Iter<'_, Self::P> {
             self.peers.iter()
+        }
+        fn iter_mut(&mut self) -> IterMut<'_, Self::P> {
+            self.peers.iter_mut()
         }
     }
 
