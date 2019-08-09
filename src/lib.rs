@@ -7,6 +7,9 @@ use std::sync::mpsc::Sender;
 
 // Transport configurtatiion trait
 pub trait TransportConfiguration<Data> {
+    // creates new transport configuration with specified network
+    // address for incoming messages listener
+    fn new(set_bind_net_addr: String) -> Self;
     // register a sending-half of std::sync::mpsc::channel which is used to push
     // all received messages to.
     // Several channels can be registered, they will be pushed in
@@ -65,12 +68,24 @@ mod tests {
     #[derive(Clone, Debug, Deserialize, Serialize, Eq, Hash, PartialEq, PartialOrd, Ord)]
     pub struct Id(pub u32);
 
+    impl From<usize> for Id {
+        fn from(x: usize) -> Id {
+            Id(x as u32)
+        }
+    }
+
     struct TestPeer<Id> {
         pub id: Id,
         pub net_addr: String,
     }
 
     impl Peer<Id> for TestPeer<Id> {
+        fn new(id: Id, addr: String) -> TestPeer<Id> {
+            TestPeer {
+                id: id,
+                net_addr: addr,
+            }
+        }
         fn get_id(&self) -> Id {
             self.id.clone()
         }
@@ -85,6 +100,11 @@ mod tests {
 
     impl PeerList<Id, Error> for TestPeerList<Id> {
         type P = TestPeer<Id>;
+        fn new() -> Self {
+            TestPeerList {
+                peers: Vec::with_capacity(1),
+            }
+        }
         fn add(&mut self, p: TestPeer<Id>) -> std::result::Result<(), Error> {
             if self.peers.len() == std::usize::MAX {
                 return Err(AtMaxVecCapacity);
@@ -107,12 +127,23 @@ mod tests {
         }
     }
 
-    fn CommonTest<
-        T: Transport<Id, Data, Error, TestPeerList<Id>>,
-        C: TransportConfiguration<Data>,
+    fn common_test<
+        C: TransportConfiguration<Data> + Clone,
+        T: Transport<Id, Data, Error, TestPeerList<Id>, Configuration = C>,
     >(
         net_addrs: Vec<String>,
     ) {
+        let mut cfgs: Vec<C> = Vec::with_capacity(net_addrs.len());
+        let mut pl: TestPeerList<Id> = TestPeerList::new();
+        for i in 0..net_addrs.len() {
+            cfgs.push(C::new(net_addrs[i].clone()));
+            pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
+                .unwrap();
+        }
+        let mut trns: Vec<T> = Vec::with_capacity(net_addrs.len());
+        for i in 0..net_addrs.len() {
+            trns.push(T::new(cfgs[i].clone()));
+        }
     }
 
     #[test]
