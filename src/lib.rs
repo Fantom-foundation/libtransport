@@ -1,3 +1,4 @@
+//#![feature(generic_associated_types)]
 use crate::errors::Result;
 use libcommon_rs::peer::{PeerId, PeerList};
 use serde::de::DeserializeOwned;
@@ -53,6 +54,7 @@ pub mod errors;
 mod tests {
     use super::errors::{Error, Error::AtMaxVecCapacity, Result};
     use super::Transport;
+    use core::slice::Iter;
     use libcommon_rs::peer::{Peer, PeerId, PeerList};
     use serde::{Deserialize, Serialize};
 
@@ -79,33 +81,8 @@ mod tests {
         peers: Vec<TestPeer<Id>>,
     }
 
-    struct IterTestPeerList<'a, Id: 'a> {
-        inner: &'a TestPeerList<Id>,
-        pos: usize,
-    }
-
-    impl<'a, Id> Iterator for IterTestPeerList<'a, Id> {
-        type Item = &'a TestPeer<Id>;
-        fn next(&mut self) -> Option<Self::Item> {
-            if self.pos >= self.inner.peers.len() {
-                None
-            } else {
-                self.pos += 1;
-                self.inner.peers.get(self.pos - 1)
-            }
-        }
-    }
-
-    //impl<Id> Iterator for TestPeerList<Id> {
-    //    fn iter<'a>(&'a self) -> IterTestPeerList<'a, TestPeerList<Id>> {
-    //        IterTestPeerList::<Id> {
-    //            inner: self,
-    //            pos: 0,
-    //        }
-    //    }
-    //}
-
-    impl<'a, Error> PeerList<Id, Error> for TestPeerList<Id> {
+    impl PeerList<Id, Error> for TestPeerList<Id> {
+        type P = TestPeer<Id>;
         fn add(&mut self, p: TestPeer<Id>) -> std::result::Result<(), Error> {
             if self.peers.len() == std::usize::MAX {
                 return Err(AtMaxVecCapacity);
@@ -113,16 +90,16 @@ mod tests {
             self.peers.push(p);
             Ok(())
         }
-        fn get_peers_from_file(json_peer_path: String) -> std::result::Result<(), Error> {
+        fn get_peers_from_file(
+            &mut self,
+            _json_peer_path: String,
+        ) -> std::result::Result<(), Error> {
             // Stub not used in tests to satisfy PeerList trait
             Ok(())
         }
-        type IterType = IterTestPeerList<'a, TestPeerList<Id>>;
-        fn iter(&'a self) -> IterTestPeerList<'a, TestPeerList<Id>> {
-            IterTestPeerList::<Id> {
-                inner: self,
-                pos: 0,
-            }
+        //        type IterType<'x> = IterTestPeerList<'x, TestPeerList<Id>>;
+        fn iter(&self) -> Iter<'_, Self::P> {
+            self.peers.iter()
         }
     }
 
