@@ -62,6 +62,9 @@ mod tests {
     use core::slice::{Iter, IterMut};
     use libcommon_rs::peer::{Peer, PeerId, PeerList};
     use serde::{Deserialize, Serialize};
+    use std::ops::{Index, IndexMut};
+    use std::sync::mpsc;
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[derive(Clone, Debug, Deserialize, Serialize, Eq, Hash, PartialEq, PartialOrd, Ord)]
     pub struct Data(pub u32);
@@ -71,6 +74,12 @@ mod tests {
     impl From<usize> for Id {
         fn from(x: usize) -> Id {
             Id(x as u32)
+        }
+    }
+
+    impl From<usize> for Data {
+        fn from(x: usize) -> Data {
+            Data(x as u32)
         }
     }
 
@@ -96,6 +105,19 @@ mod tests {
 
     struct TestPeerList<Id> {
         peers: Vec<TestPeer<Id>>,
+    }
+
+    impl<Id> Index<usize> for TestPeerList<Id> {
+        type Output = TestPeer<Id>;
+        fn index(&self, index: usize) -> &Self::Output {
+            &self.peers[index]
+        }
+    }
+
+    impl<Id> IndexMut<usize> for TestPeerList<Id> {
+        fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+            &mut self.peers[index]
+        }
     }
 
     impl PeerList<Id, Error> for TestPeerList<Id> {
@@ -133,17 +155,37 @@ mod tests {
     >(
         net_addrs: Vec<String>,
     ) {
-        let mut cfgs: Vec<C> = Vec::with_capacity(net_addrs.len());
+        let n_peers = net_addrs.len();
+        let mut cfgs: Vec<C> = Vec::with_capacity(n_peers);
         let mut pl: TestPeerList<Id> = TestPeerList::new();
-        for i in 0..net_addrs.len() {
-            cfgs.push(C::new(net_addrs[i].clone()));
+        let mut ch_r: Vec<Receiver<Data>> = Vec::with_capacity(n_peers);
+        for i in 0..n_peers {
+            let mut config = C::new(net_addrs[i].clone());
+            let (tx, rx) = mpsc::channel::<Data>();
+            ch_r[i] = rx;
+            config.register_channel(tx).unwrap();
+            cfgs.push(config);
             pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
                 .unwrap();
         }
-        let mut trns: Vec<T> = Vec::with_capacity(net_addrs.len());
-        for i in 0..net_addrs.len() {
+        let mut trns: Vec<T> = Vec::with_capacity(n_peers);
+        for i in 0..n_peers {
             trns.push(T::new(cfgs[i].clone()));
         }
+
+        // Test broadcast
+        let d: Data = Data(55);
+        trns[0].broadcast(&mut pl, d.clone()).unwrap();
+        for i in 0..n_peers {
+            let t = ch_r[i].recv().unwrap();
+            assert_eq!(d, t);
+        }
+
+        // Test direct sending
+        let u: Data = Data(0xaa);
+        trns[1].send(pl[0].net_addr.clone(), u.clone()).unwrap();
+        let t = ch_r[0].recv().unwrap();
+        assert_eq!(u, t);
     }
 
     #[test]
