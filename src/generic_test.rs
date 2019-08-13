@@ -100,7 +100,7 @@ pub fn common_test<
     for i in 0..n_peers {
         let mut config = C::new(net_addrs[i].clone());
         let (tx, rx) = mpsc::channel::<Data>();
-        ch_r[i] = rx;
+        ch_r.insert(i, rx);
         config.register_channel(tx).unwrap();
         pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
             .unwrap();
