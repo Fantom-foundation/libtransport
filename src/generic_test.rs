@@ -24,7 +24,7 @@ impl From<usize> for Data {
     }
 }
 
-struct TestPeer<Id> {
+pub struct TestPeer<Id> {
     pub id: Id,
     pub net_addr: String,
 }
@@ -44,7 +44,7 @@ impl Peer<Id> for TestPeer<Id> {
     }
 }
 
-struct TestPeerList<Id> {
+pub struct TestPeerList<Id> {
     peers: Vec<TestPeer<Id>>,
 }
 
@@ -87,7 +87,7 @@ impl PeerList<Id, Error> for TestPeerList<Id> {
     }
 }
 
-fn common_test<
+pub fn common_test<
     C: TransportConfiguration<Data> + Clone,
     T: Transport<Id, Data, Error, TestPeerList<Id>, Configuration = C>,
 >(
