@@ -88,27 +88,23 @@ impl PeerList<Id, Error> for TestPeerList<Id> {
 }
 
 pub fn common_test<
-    C: TransportConfiguration<Data> + Clone,
+    C: TransportConfiguration<Data>,
     T: Transport<Id, Data, Error, TestPeerList<Id>, Configuration = C>,
 >(
     net_addrs: Vec<String>,
 ) {
     let n_peers = net_addrs.len();
-    let mut cfgs: Vec<C> = Vec::with_capacity(n_peers);
     let mut pl: TestPeerList<Id> = TestPeerList::new();
     let mut ch_r: Vec<Receiver<Data>> = Vec::with_capacity(n_peers);
+    let mut trns: Vec<T> = Vec::with_capacity(n_peers);
     for i in 0..n_peers {
         let mut config = C::new(net_addrs[i].clone());
         let (tx, rx) = mpsc::channel::<Data>();
         ch_r[i] = rx;
         config.register_channel(tx).unwrap();
-        cfgs.push(config);
         pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
             .unwrap();
-    }
-    let mut trns: Vec<T> = Vec::with_capacity(n_peers);
-    for i in 0..n_peers {
-        trns.push(T::new(cfgs[i].clone()));
+        trns.push(T::new(config));
     }
 
     // Test broadcast
