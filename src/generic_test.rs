@@ -108,14 +108,17 @@ pub fn common_test<
     }
 
     // Test broadcast
+    println!("Broadcast test");
     let d: Data = Data(55);
     trns[0].broadcast(&mut pl, d.clone()).unwrap();
     for i in 0..n_peers {
+        println!("receiving from peer {}", i);
         let t = ch_r[i].recv().unwrap();
         assert_eq!(d, t);
     }
 
     // Test direct sending
+    println!("Unicast test");
     let u: Data = Data(0xaa);
     trns[1].send(pl[0].net_addr.clone(), u.clone()).unwrap();
     let t = ch_r[0].recv().unwrap();
