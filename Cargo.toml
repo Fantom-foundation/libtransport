@@ -8,3 +8,4 @@ edition = "2018"
 libcommon-rs = { git = "https://github.com/Fantom-foundation/libcommon-rs" }
 serde = "1.0.97"
 bincode = "1.0.1"
+os_pipe = "0.8.0"
