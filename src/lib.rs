@@ -2,8 +2,6 @@
 use crate::errors::Result;
 use libcommon_rs::peer::{PeerId, PeerList};
 use os_pipe::PipeWriter;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 use std::sync::mpsc::Sender;
 
 // Transport configurtatiion trait
