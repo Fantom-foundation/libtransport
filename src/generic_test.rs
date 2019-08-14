@@ -31,10 +31,7 @@ pub struct TestPeer<Id> {
 
 impl Peer<Id> for TestPeer<Id> {
     fn new(id: Id, addr: String) -> TestPeer<Id> {
-        TestPeer {
-            id,
-            net_addr: addr,
-        }
+        TestPeer { id, net_addr: addr }
     }
     fn get_id(&self) -> Id {
         self.id.clone()
