@@ -54,7 +54,6 @@ pub trait TransportConfiguration<Data> {
 // it can be a truct containing message type and payload data
 pub trait Transport<Id, Data, Error, Pl>: Drop
 where
-    Data: Serialize + DeserializeOwned,
     Id: PeerId,
     Pl: PeerList<Id, Error>,
 {
