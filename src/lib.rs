@@ -2,8 +2,6 @@
 use crate::errors::Result;
 use libcommon_rs::peer::{PeerId, PeerList};
 use os_pipe::PipeWriter;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 use std::sync::mpsc::Sender;
 
 // Transport configurtatiion trait
@@ -54,7 +52,6 @@ pub trait TransportConfiguration<Data> {
 // it can be a truct containing message type and payload data
 pub trait Transport<Id, Data, Error, Pl>: Drop
 where
-    Data: Serialize + DeserializeOwned,
     Id: PeerId,
     Pl: PeerList<Id, Error>,
 {

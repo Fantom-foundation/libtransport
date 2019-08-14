@@ -32,7 +32,7 @@ pub struct TestPeer<Id> {
 impl Peer<Id> for TestPeer<Id> {
     fn new(id: Id, addr: String) -> TestPeer<Id> {
         TestPeer {
-            id: id,
+            id,
             net_addr: addr,
         }
     }
