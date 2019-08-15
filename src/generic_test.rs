@@ -2,6 +2,7 @@ use crate::errors::{Error, Error::AtMaxVecCapacity};
 use crate::{Transport, TransportConfiguration};
 use core::slice::{Iter, IterMut};
 use libcommon_rs::peer::{Peer, PeerList};
+use os_pipe::{pipe, PipeReader};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};
 use std::sync::mpsc;
@@ -93,12 +94,16 @@ pub fn common_test<
     let n_peers = net_addrs.len();
     let mut pl: TestPeerList<Id> = TestPeerList::new();
     let mut ch_r: Vec<Receiver<Data>> = Vec::with_capacity(n_peers);
+    let mut pi_r: Vec<PipeReader> = Vec::with_capacity(n_peers);
     let mut trns: Vec<T> = Vec::with_capacity(n_peers);
     for i in 0..n_peers {
         let mut config = C::new(net_addrs[i].clone());
         let (tx, rx) = mpsc::channel::<Data>();
         ch_r.insert(i, rx);
         config.register_channel(tx).unwrap();
+        let (reader, writer) = pipe().unwrap();
+        pi_r.insert(i, reader);
+        config.register_os_pipe(writer).unwrap();
         pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
             .unwrap();
         trns.push(T::new(config));
