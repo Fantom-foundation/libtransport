@@ -29,23 +29,11 @@ impl From<usize> for Data {
 pub struct TestPeer<Id> {
     pub id: Id,
     pub net_addr: String,
-    pub last_data: Option<Data>,
-}
-
-impl TestPeer<Id> {
-    fn set_last_data(&mut self, data: Data) -> bool {
-        self.last_data = Some(data);
-        true
-    }
 }
 
 impl Peer<Id> for TestPeer<Id> {
     fn new(id: Id, addr: String) -> TestPeer<Id> {
-        TestPeer {
-            id,
-            net_addr: addr,
-            last_data: None,
-        }
+        TestPeer { id, net_addr: addr }
     }
     fn get_id(&self) -> Id {
         self.id.clone()
@@ -117,11 +105,8 @@ pub fn common_test<
         //let (reader, writer) = pipe().unwrap();
         //pi_r.insert(i, reader);
         //config.register_os_pipe(writer).unwrap();
-        let mut peer = TestPeer::new(i.into(), net_addrs[i].clone());
-        config
-            .register_callback(|d: Data| peer.set_last_data(d))
+        pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
             .unwrap();
-        pl.add(peer).unwrap();
         trns.push(T::new(config));
     }
     thread::sleep(time::Duration::from_secs(3));
@@ -134,14 +119,6 @@ pub fn common_test<
         println!("receiving from peer {}", i);
         let t = ch_r[i].recv().unwrap();
         assert_eq!(d, t);
-        println!("checking closure delivary on peer {}", i);
-        let peer_data = {
-            match &pl[i].last_data {
-                None => panic!("none on the peer {}", i),
-                Some(x) => x,
-            }
-        };
-        assert_eq!(d, *peer_data);
     }
 
     // Test direct sending
