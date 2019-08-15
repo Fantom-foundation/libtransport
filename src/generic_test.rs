@@ -2,7 +2,7 @@ use crate::errors::{Error, Error::AtMaxVecCapacity};
 use crate::{Transport, TransportConfiguration};
 use core::slice::{Iter, IterMut};
 use libcommon_rs::peer::{Peer, PeerList};
-use os_pipe::{pipe, PipeReader};
+//use os_pipe::{pipe, PipeReader};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};
 use std::sync::mpsc;
@@ -29,11 +29,23 @@ impl From<usize> for Data {
 pub struct TestPeer<Id> {
     pub id: Id,
     pub net_addr: String,
+    pub last_data: Option<Data>,
+}
+
+impl TestPeer<Id> {
+    fn set_last_data(&mut self, data: Data) -> bool {
+        self.last_data = Some(data);
+        true
+    }
 }
 
 impl Peer<Id> for TestPeer<Id> {
     fn new(id: Id, addr: String) -> TestPeer<Id> {
-        TestPeer { id, net_addr: addr }
+        TestPeer {
+            id,
+            net_addr: addr,
+            last_data: None,
+        }
     }
     fn get_id(&self) -> Id {
         self.id.clone()
@@ -95,18 +107,21 @@ pub fn common_test<
     let n_peers = net_addrs.len();
     let mut pl: TestPeerList<Id> = TestPeerList::new();
     let mut ch_r: Vec<Receiver<Data>> = Vec::with_capacity(n_peers);
-    let mut pi_r: Vec<PipeReader> = Vec::with_capacity(n_peers);
+    //let mut pi_r: Vec<PipeReader> = Vec::with_capacity(n_peers);
     let mut trns: Vec<T> = Vec::with_capacity(n_peers);
     for i in 0..n_peers {
         let mut config = C::new(net_addrs[i].clone());
         let (tx, rx) = mpsc::channel::<Data>();
         ch_r.insert(i, rx);
         config.register_channel(tx).unwrap();
-        let (reader, writer) = pipe().unwrap();
-        pi_r.insert(i, reader);
-        config.register_os_pipe(writer).unwrap();
-        pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
+        //let (reader, writer) = pipe().unwrap();
+        //pi_r.insert(i, reader);
+        //config.register_os_pipe(writer).unwrap();
+        let mut peer = TestPeer::new(i.into(), net_addrs[i].clone());
+        config
+            .register_callback(|d: Data| peer.set_last_data(d))
             .unwrap();
+        pl.add(peer).unwrap();
         trns.push(T::new(config));
     }
     thread::sleep(time::Duration::from_secs(3));
@@ -119,6 +134,14 @@ pub fn common_test<
         println!("receiving from peer {}", i);
         let t = ch_r[i].recv().unwrap();
         assert_eq!(d, t);
+        println!("checking closure delivary on peer {}", i);
+        let peer_data = {
+            match &pl[i].last_data {
+                None => panic!("none on the peer {}", i),
+                Some(x) => x,
+            }
+        };
+        assert_eq!(d, *peer_data);
     }
 
     // Test direct sending

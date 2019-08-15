@@ -1,7 +1,7 @@
 //#![feature(generic_associated_types)]
 use crate::errors::Result;
 use libcommon_rs::peer::{PeerId, PeerList};
-use os_pipe::PipeWriter;
+//use os_pipe::PipeWriter;
 use std::sync::mpsc::Sender;
 
 // Transport configurtatiion trait
@@ -20,18 +20,19 @@ pub trait TransportConfiguration<Data> {
     // all received data blocks to.
     // Several pipes can be registered, they will be pushed in
     // the order of registration.
-    fn register_os_pipe(&mut self, sender: PipeWriter) -> Result<()>;
+    //fn register_os_pipe(&mut self, sender: PipeWriter) -> Result<()>;
 
-    // register a callback function which is called when data is received.
-    // Several callback functions can be registered, they will be called in
+    // register a callback function or closure which is called when data is received.
+    // Several callback functions or closures can be registered, they will be called in
     // the order of registration.
-    // The callback function must return True when transaction is processed successfully
-    // and False otherwise. The same callback function will be called with the same data
-    // until callback function return True; a pause between  consecutive calls of the
+    // The callback function and closure take one argument of type Data and must return
+    // True when transaction is processed successfully and False otherwise.
+    // The same callback function will be called with the same data until callback
+    // function return True; a pause between  consecutive calls of the
     // callback function with the same block will be made for the value of milliseconds
     // set by set_callback_timeout() function of the TRansportConfiguration trait;
     // default value of the timeout is implementation defined.
-    fn register_callback(&mut self, callback: fn(data: Data) -> bool) -> Result<()>;
+    fn register_callback(&mut self, callback: impl FnMut(Data) -> bool) -> Result<()>;
 
     // Set timeout in milliseconds between consecutive calls of the callback
     // function with the same data received.
