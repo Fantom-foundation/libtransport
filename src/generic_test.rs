@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};
 use std::sync::mpsc;
 use std::sync::mpsc::Receiver;
+use std::{thread, time};
 
 #[derive(Clone, Debug, Deserialize, Serialize, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct Data(pub u32);
@@ -108,6 +109,7 @@ pub fn common_test<
             .unwrap();
         trns.push(T::new(config));
     }
+    thread::sleep(time::Duration::from_secs(3));
 
     // Test broadcast
     println!("Broadcast test");
