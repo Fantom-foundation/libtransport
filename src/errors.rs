@@ -46,6 +46,6 @@ impl<'a, T> From<PoisonError<MutexGuard<'a, T>>> for Error {
 #[macro_export]
 macro_rules! none_error {
     () => {
-        libtransport::errors::Error::Base(fantom_common_rs::errors::Error::NoneError)
+        libtransport::errors::Error::Base(libcommon_rs::errors::Error::NoneError)
     };
 }
