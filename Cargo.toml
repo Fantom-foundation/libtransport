@@ -9,3 +9,4 @@ libcommon-rs = { git = "https://github.com/Fantom-foundation/libcommon-rs" }
 serde = "1.0.97"
 bincode = "1.0.1"
 os_pipe = "0.8.0"
+futures-preview = { version = "=0.3.0-alpha.17", features = ["async-await", "nightly"] }
