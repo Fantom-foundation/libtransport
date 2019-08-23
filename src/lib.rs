@@ -3,6 +3,7 @@ use futures::stream::Stream;
 use libcommon_rs::peer::{PeerId, PeerList};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use std::marker::Unpin;
 
 // Transport configurtatiion trait
 pub trait TransportConfiguration<Data> {
@@ -23,7 +24,7 @@ pub trait TransportConfiguration<Data> {
 // Data - Transmitting data type;
 // Error - error type returned by methods of Pl: PeerList
 // it can be a truct containing message type and payload data
-pub trait Transport<Id, Data, Error, Pl>: Stream<Item = Data> + Drop
+pub trait Transport<Id, Data, Error, Pl>: Stream<Item = Data> + Drop + Unpin
 where
     Id: PeerId,
     Pl: PeerList<Id, Error>,

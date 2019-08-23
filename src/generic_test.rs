@@ -1,12 +1,11 @@
 use crate::errors::{Error, Error::AtMaxVecCapacity};
 use crate::{Transport, TransportConfiguration};
 use core::slice::{Iter, IterMut};
+use futures::executor::block_on;
+use futures::stream::StreamExt;
 use libcommon_rs::peer::{Peer, PeerList};
-//use os_pipe::{pipe, PipeReader};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};
-use std::sync::mpsc;
-use std::sync::mpsc::Receiver;
 use std::{thread, time};
 
 #[derive(Clone, Debug, Deserialize, Serialize, Eq, Hash, PartialEq, PartialOrd, Ord)]
@@ -94,17 +93,9 @@ pub fn common_test<
 ) {
     let n_peers = net_addrs.len();
     let mut pl: TestPeerList<Id> = TestPeerList::new();
-    let mut ch_r: Vec<Receiver<Data>> = Vec::with_capacity(n_peers);
-    //let mut pi_r: Vec<PipeReader> = Vec::with_capacity(n_peers);
     let mut trns: Vec<T> = Vec::with_capacity(n_peers);
     for i in 0..n_peers {
-        let mut config = C::new(net_addrs[i].clone());
-        let (tx, rx) = mpsc::channel::<Data>();
-        ch_r.insert(i, rx);
-        config.register_channel(tx).unwrap();
-        //let (reader, writer) = pipe().unwrap();
-        //pi_r.insert(i, reader);
-        //config.register_os_pipe(writer).unwrap();
+        let config = C::new(net_addrs[i].clone());
         pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
             .unwrap();
         trns.push(T::new(config));
@@ -116,15 +107,25 @@ pub fn common_test<
     let d: Data = Data(55);
     trns[0].broadcast(&mut pl, d.clone()).unwrap();
     for i in 0..n_peers {
-        println!("receiving from peer {}", i);
-        let t = ch_r[i].recv().unwrap();
-        assert_eq!(d, t);
+        block_on(async {
+            println!("receiving from peer {}", i);
+            let n = trns[i].next().await;
+            match n {
+                Some(t) => assert_eq!(d, t),
+                None => panic!("unexpected None"),
+            }
+        });
     }
 
     // Test direct sending
     println!("Unicast test");
     let u: Data = Data(0xaa);
     trns[1].send(pl[0].net_addr.clone(), u.clone()).unwrap();
-    let t = ch_r[0].recv().unwrap();
-    assert_eq!(u, t);
+    block_on(async {
+        let n = trns[0].next().await;
+        match n {
+            Some(t) => assert_eq!(u, t),
+            None => panic!("unexpected None"),
+        }
+    });
 }
