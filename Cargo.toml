@@ -1,7 +1,11 @@
 [package]
 name = "libtransport"
 version = "0.0.1"
-authors = ["Samuel Marks <@SamuelMarks>"]
+authors = [
+    "Maxim Zakharov <@Maxime2>",
+    "Samuel Marks <@SamuelMarks>",
+    "Vladimir Komendantskiy <komendantsky@gmail.com>",
+]
 edition = "2018"
 
 [dependencies]
