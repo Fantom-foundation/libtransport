@@ -22,12 +22,12 @@ pub enum TransportType {
 pub trait TransportConfiguration<Data> {
     /// Creates a new transport configuration with the specified network address for incoming
     /// message listener.
-    fn new(set_bind_net_addr: String) -> Result<Self>
+    fn new(bind_net_addr: &str) -> Result<Self>
     where
         Self: Sized;
 
     /// Sets the bind network address of the incoming message listener.
-    fn set_bind_net_addr(&mut self, address: String) -> Result<()>;
+    fn set_bind_net_addr(&mut self, address: &str) -> Result<()>;
 }
 
 /// The `Transport` trait defines the functionality for connecting with other devices in the same
@@ -64,7 +64,7 @@ where
     fn new(cfg: Self::Configuration) -> Self;
 
     /// Sends the specified message to the specified peer.
-    fn send(&mut self, peer_address: String, data: Data) -> Result<()>;
+    fn send(&mut self, peer_address: &str, data: Data) -> Result<()>;
 
     /// Broadcasts a message of type `Data` to all peers.
     fn broadcast(&mut self, peers: &mut Pl, data: Data) -> Result<()>;

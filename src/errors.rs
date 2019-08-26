@@ -21,7 +21,7 @@ pub enum Error {
     /// Indicating read/write operation was unable to read/write complete size of data
     Incomplete,
     PoisonError(String),
-    /// Socket parse error.
+    /// Socket address parse error.
     AddrParse(AddrParseError),
 }
 /// Allow errors to be converted from a standard error to a BaseError type.

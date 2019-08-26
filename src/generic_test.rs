@@ -146,7 +146,7 @@ pub fn common_test<
     // Iterate over all peers, create a config for each one and create a Transport to handle
     // messaging.
     for (i, addr) in net_addrs.iter().enumerate().take(n_peers) {
-        let config = C::new(addr.clone()).expect("cannot create config");
+        let config = C::new(addr.as_str()).expect("cannot create config");
         pl.add(TestPeer::new(i.into(), addr.clone()))
             .expect("cannot add peer");
         trns.push(T::new(config));
@@ -178,7 +178,7 @@ pub fn common_test<
     println!("Unicast test");
     let u: Data = Data(0xaa);
     // Send directed data between two peers.
-    trns[1].send(pl[0].net_addr.clone(), u.clone()).unwrap();
+    trns[1].send(pl[0].net_addr.as_str(), u.clone()).unwrap();
     // Asynchronously check whether the receiver got the sent message.
     block_on(async {
         let n = trns[0].next().await;
