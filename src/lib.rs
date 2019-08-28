@@ -5,6 +5,11 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::marker::Unpin;
 
+pub enum TransportType {
+    Unknown,
+    TCP,
+}
+
 // Transport configurtatiion trait
 pub trait TransportConfiguration<Data> {
     // creates new transport configuration with specified network
