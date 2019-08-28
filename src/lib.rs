@@ -9,7 +9,9 @@ use std::marker::Unpin;
 pub trait TransportConfiguration<Data> {
     // creates new transport configuration with specified network
     // address for incoming messages listener
-    fn new(set_bind_net_addr: String) -> Self;
+    fn new(set_bind_net_addr: String) -> Result<Self>
+    where
+        Self: Sized;
 
     // set bind network address for incoming messages listener
     fn set_bind_net_addr(&mut self, address: String) -> Result<()>;

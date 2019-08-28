@@ -95,7 +95,7 @@ pub fn common_test<
     let mut pl: TestPeerList<Id> = TestPeerList::new();
     let mut trns: Vec<T> = Vec::with_capacity(n_peers);
     for i in 0..n_peers {
-        let config = C::new(net_addrs[i].clone());
+        let config = C::new(net_addrs[i].clone()).unwrap();
         pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
             .unwrap();
         trns.push(T::new(config));
