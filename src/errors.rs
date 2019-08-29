@@ -13,15 +13,20 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// A set of enums to differentiate between different types of errors.
 #[derive(Debug)]
 pub enum Error {
+    /// A "common" error of type [`libcommon_rs::errors::Error`].
     Base(BaseError),
-    /// Indicating a vector reached max capacity and can not receive new element
+    /// An error indicating that a vector reached the maximum capacity and cannot be pushed any more
+    /// values.
     AtMaxVecCapacity,
+    /// An error in the [`bincode`] crate.
     Bincode(bincode::Error),
+    /// A standard library IO error.
     Io(std::io::Error),
-    /// Indicating read/write operation was unable to read/write complete size of data
+    /// An error indicating that read/write operation was unable to complete.
     Incomplete,
+    /// A mutex error.
     PoisonError(String),
-    /// Socket address parse error.
+    /// A aocket address parse error.
     AddrParse(AddrParseError),
 }
 /// Allow errors to be converted from a standard error to a BaseError type.
@@ -55,7 +60,17 @@ impl<'a, T> From<PoisonError<MutexGuard<'a, T>>> for Error {
     }
 }
 
-/// Macro for when there is no error: equivalent of a 'None' for errors.
+/// Allow errors to be converted from a standard error to a PoisonError.
+impl From<AddrParseError> for Error {
+    #[inline]
+    fn from(e: AddrParseError) -> Error {
+        Error::AddrParse(e)
+    }
+}
+
+/// A macro shorthand denoting the absence of errors in the context of instances of
+/// [`Transport`]. [`libcommon_rs::errors::Error::NoneError`] plays a similar role among errors to
+/// that of [`None`] among optional values.
 #[macro_export]
 macro_rules! none_error {
     () => {
