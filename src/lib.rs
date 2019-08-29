@@ -41,7 +41,9 @@ where
     type Configuration: TransportConfiguration<Data>;
 
     // Create new Transport instance
-    fn new(cfg: Self::Configuration) -> Self;
+    fn new(cfg: Self::Configuration) -> Self
+    where
+        Self: Sized;
 
     // send specified message to the specified peer
     fn send(&mut self, peer_address: String, data: Data) -> Result<()>;
