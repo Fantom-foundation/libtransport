@@ -129,11 +129,12 @@ pub trait TransportConfiguration<Data> {
 /// Transport trait allows us to create multiple message sending/receiving services which share
 /// similar functionality.
 ///
-/// The Transport trait requires 5 types to work:
+/// The Transport trait requires 4 parameter types to work:
 /// Id: The peer's ID type.
 /// Data: The data being transmitted.
 /// Error: An error returned by the PeerList trait
 /// Pl: A list of Peers (PeerList trait struct)
+///  also an associated type should be defined
 /// Configuration: A struct implementing TransportConfiguration
 ///
 /// NOTE: TCP Transport should implement Stream in order for this to be accepted.
@@ -141,16 +142,16 @@ pub trait TransportConfiguration<Data> {
 /// For an example of how this trait can be implemented, please look at the libtransport-tcp
 /// repository: https://github.com/Fantom-foundation/libtransport-tcp
 
-pub trait Transport<Id, Data, Error, Pl, Configuration>:
-    Stream<Item = Data> + Drop + Unpin
+pub trait Transport<Id, Data, Error, Pl>: Stream<Item = Data> + Drop + Unpin
 where
     Id: PeerId,
     Pl: PeerList<Id, Error>,
     Data: Serialize + DeserializeOwned,
-    Configuration: TransportConfiguration<Data>,
 {
+    type Configuration: TransportConfiguration<Data>;
+
     /// Creates a new Transport type using a preset configuration type.
-    fn new(cfg: Configuration) -> Self
+    fn new(cfg: Self::Configuration) -> Self
     where
         Self: Sized;
 
