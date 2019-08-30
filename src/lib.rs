@@ -49,6 +49,7 @@
 ///
 /// For further examples on how you can use the Transport trait, please look at the 'generic_test.rs'
 /// file for a simple implementation.
+///
 use crate::errors::Result;
 use futures::stream::Stream;
 use libcommon_rs::peer::{PeerId, PeerList};
@@ -85,6 +86,7 @@ pub enum TransportType {
 ///
 /// impl<Data> TransportConfiguration<Data> for ExampleTransportConfig<Data> {
 ///
+///     // Creates a new configuration type and binds the given address to a listener
 ///     fn new(set_bind_net_addr: String) -> Result<Self, Error> where
 ///         Self: Sized {
 ///
@@ -97,6 +99,7 @@ pub enum TransportType {
 ///         })
 ///     }
 ///
+///     // Used to change the listener address. Binds input address to a new listener
 ///     fn set_bind_net_addr(&mut self,address: String) -> Result<(), Error> {
 ///
 ///         self.bind_net_addr = address;
@@ -113,7 +116,7 @@ pub trait TransportConfiguration<Data> {
     /// Creates a new configuration with a specified network, taking the address of the incoming
     /// messages listener.
     /// Requires a network address as a String.
-    /// For an example of an implementation of this function, check the libtransport.tcp repository.
+    /// For an example of an implementation of this function, check the libtransport-tcp repository.
     fn new(set_bind_net_addr: String) -> Result<Self>
     where
         Self: Sized;
@@ -122,44 +125,42 @@ pub trait TransportConfiguration<Data> {
     fn set_bind_net_addr(&mut self, address: String) -> Result<()>;
 }
 
-// Transport trait for various implementations of message
-// sending/receiving services
-//
-// peer_address - network address of the peer; e.g. "IP:port".
-//
-// Id - peer ID type
-// Data - Transmitting data type;
-// Error - error type returned by methods of Pl: PeerList
-// it can be a truct containing message type and payload data
+/// Transport trait allows us to create multiple message sending/receiving services which share
+/// similar functionality.
+///
+/// The Transport trait requires 5 types to work:
+/// Id: The peer's ID type.
+/// Data: The data being transmitted.
+/// Error: An error returned by the PeerList trait
+/// Pl: A list of Peers (PeerList trait struct)
+/// Configuration: A struct implementing TransportConfiguration
+///
+/// NOTE: TCP Transport should implement Stream in order for this to be accepted.
+///
+/// For an example of how this trait can be implemented, please look at the libtransport-tcp
+/// repository: https://github.com/Fantom-foundation/libtransport-tcp
+
 pub trait Transport<Id, Data, Error, Pl, Configuration>:
     Stream<Item = Data> + Drop + Unpin
 where
     Id: PeerId,
     Pl: PeerList<Id, Error>,
     Data: Serialize + DeserializeOwned,
-    // transport configuration type
     Configuration: TransportConfiguration<Data>,
 {
-    // Create new Transport instance
+    /// Creates a new Transport type using a preset configuration type.
     fn new(cfg: Configuration) -> Self
     where
         Self: Sized;
 
-    // send specified message to the specified peer
+    /// Sends a message of type 'Data' to the specified peer (as specified by an address)
     fn send(&mut self, peer_address: String, data: Data) -> Result<()>;
 
-    // broadcast specified message to all peers
+    /// Broadcasts a message of type 'Data' to all peers on the network. Requires a struct which
+    /// implements PeerList.
     fn broadcast(&mut self, peers: &mut Pl, data: Data) -> Result<()>;
 }
 
+// Imports
 pub mod errors;
 pub mod generic_test;
-
-#[cfg(test)]
-mod tests {
-
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
