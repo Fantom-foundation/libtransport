@@ -87,7 +87,7 @@ impl PeerList<Id, Error> for TestPeerList<Id> {
 
 pub fn common_test<
     C: TransportConfiguration<Data>,
-    T: Transport<Id, Data, Error, TestPeerList<Id>, Configuration = C>,
+    T: Transport<Id, Data, Error, TestPeerList<Id>, C>,
 >(
     net_addrs: Vec<String>,
 ) {

@@ -31,17 +31,17 @@ pub trait TransportConfiguration<Data> {
 // Data - Transmitting data type;
 // Error - error type returned by methods of Pl: PeerList
 // it can be a truct containing message type and payload data
-pub trait Transport<Id, Data, Error, Pl>: Stream<Item = Data> + Drop + Unpin
+pub trait Transport<Id, Data, Error, Pl, Configuration>:
+    Stream<Item = Data> + Drop + Unpin
 where
     Id: PeerId,
     Pl: PeerList<Id, Error>,
     Data: Serialize + DeserializeOwned,
-{
     // transport configuration type
-    type Configuration: TransportConfiguration<Data>;
-
+    Configuration: TransportConfiguration<Data>,
+{
     // Create new Transport instance
-    fn new(cfg: Self::Configuration) -> Self
+    fn new(cfg: Configuration) -> Self
     where
         Self: Sized;
 
