@@ -28,11 +28,11 @@
 /// The Transport trait defines the functionality for connecting with other devices in the same
 /// network. This trait will handle the barebones methods of:
 ///
-/// a) Creating a set of peers
-/// b) Sending data between multiple peers
-/// c) Broadcasting messages to all peers within the same network.
+/// a) Recieving data from a peer
+/// b) Sending data to a peer
+/// c) Broadcasting messages to all peers in the peerslist
 ///
-/// The Transport trait requires the definition of a number of types to work properly:
+/// The Transport trait requires the following parameter types to work properly:
 ///
 /// Id: The unqiue ID type of the peer in question. This can be as simple as:
 /// ```
@@ -45,7 +45,9 @@
 /// https://github.com/Fantom-foundation/libcommon-rs )
 /// <b>Configuration:</b> The TransportConfiguration type required to make the function work.
 ///
-/// Finally, the Transport trait implements three methods: 'new', 'send', and 'broadcast'
+/// Finally, the Transport trait implements three methods: 'new', 'send', and 'broadcast'. The trait
+/// also requires an implementation of the 'Stream' trait from the async/.await framework (only
+/// available on nightly).
 ///
 /// For further examples on how you can use the Transport trait, please look at the 'generic_test.rs'
 /// file for a simple implementation.
@@ -112,7 +114,6 @@ pub enum TransportType {
 /// }
 /// ```
 pub trait TransportConfiguration<Data> {
-
     /// Creates a new configuration with a specified network, taking the address of the incoming
     /// messages listener.
     /// Requires a network address as a String.

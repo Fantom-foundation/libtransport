@@ -4,9 +4,8 @@
 /// Transport trait. This file contains a bunch of dummy data which can be quickly used for any
 /// Transport struct.
 ///
-/// The common_test method allows us to quickly test the new(), send(), and broadcast methods and
+/// The common_test method allows us to quickly test the new(), send(), and broadcast() methods and
 /// (hopefully) verifies that they work.
-
 use crate::errors::{Error, Error::AtMaxVecCapacity};
 use crate::{Transport, TransportConfiguration};
 use core::slice::{Iter, IterMut};
@@ -38,7 +37,8 @@ impl From<usize> for Data {
     }
 }
 
-// A simple struct for holding peer information, This includes both an id and an address.
+// A simple test struct for holding peer information. This includes both an id and an address.
+// NOTE: This specific implementation is only for testing purposes.
 pub struct TestPeer<Id> {
     pub id: Id,
     pub net_addr: String,
@@ -60,7 +60,7 @@ impl Peer<Id> for TestPeer<Id> {
     }
 }
 
-// Creation of our own PeerList type.
+// Creation of our own PeerList type (used for testing purposes)
 pub struct TestPeerList<Id> {
     peers: Vec<TestPeer<Id>>,
 }
@@ -82,7 +82,6 @@ impl<Id> IndexMut<usize> for TestPeerList<Id> {
 
 // Implementation of PeerList for our TestPeerList struct.
 impl PeerList<Id, Error> for TestPeerList<Id> {
-
     type P = TestPeer<Id>;
 
     // Constructor
@@ -91,7 +90,7 @@ impl PeerList<Id, Error> for TestPeerList<Id> {
             peers: Vec::with_capacity(1),
         }
     }
-    // Function which allows addimng new peers to our peer list.
+    // Function which allows adding new peers to our peer list.
     fn add(&mut self, p: TestPeer<Id>) -> std::result::Result<(), Error> {
         // Check if we're at max capacity
         if self.peers.len() == std::usize::MAX {
@@ -107,11 +106,11 @@ impl PeerList<Id, Error> for TestPeerList<Id> {
         // Stub not used in tests to satisfy PeerList trait
         Ok(())
     }
-    // Allows iteration over the file.
+    // Allows iteration over the peer list.
     fn iter(&self) -> Iter<'_, Self::P> {
         self.peers.iter()
     }
-    // Allows a mutable iteration over the file.
+    // Allows a mutable iteration over the peer list.
     fn iter_mut(&mut self) -> IterMut<'_, Self::P> {
         self.peers.iter_mut()
     }

@@ -2,7 +2,6 @@
 ///
 /// This file simply defines a set of errors and error handling functionality for the Transport
 /// trait. THis simply allows us to convert any std::Error to a variant as described in libcommon.rs.
-
 use libcommon_rs::errors::Error as BaseError;
 use std::error::Error as StdError;
 use std::sync::{MutexGuard, PoisonError};
