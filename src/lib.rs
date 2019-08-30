@@ -40,7 +40,7 @@
 /// pub struct Id(pub u32);
 /// ```
 /// <b>Data:</b> The data being transmitted between peers - same as the data struct defined above.
-/// <b>Error:</b> An error type that can be returned by the methods in PeerList
+/// <b>Error:</b> An error type that can be returned by implementations of the 'PeerList' trait
 /// <b>Pl:</b> A struct which implementes the PeerList trait (defined in the libcommon repo:
 /// https://github.com/Fantom-foundation/libcommon-rs )
 /// <b>Configuration:</b> The TransportConfiguration type required to make the function work.
@@ -49,7 +49,6 @@
 ///
 /// For further examples on how you can use the Transport trait, please look at the 'generic_test.rs'
 /// file for a simple implementation.
-
 use crate::errors::Result;
 use futures::stream::Stream;
 use libcommon_rs::peer::{PeerId, PeerList};
@@ -57,20 +56,69 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::marker::Unpin;
 
+/// An enum for identifying various Transport types. So far only the TCP variant has been identified
+/// and implemented.
+
 pub enum TransportType {
     Unknown,
     TCP,
 }
 
-// Transport configuration trait
+/// The TransportConfiguration trait - used to configure the transmission and protocol type.
+///
+/// # Examples
+/// ```
+/// use std::net::TcpListener;
+/// use libtransport::TransportConfiguration;
+/// use crate::libtransport::errors::Error;
+/// use serde::export::PhantomData;
+/// use core::mem;
+///
+/// pub struct Data(pub u32);
+///
+/// pub struct ExampleTransportConfig<Data> {
+///
+///     bind_net_addr: String,
+///     listener : TcpListener,
+///     data : PhantomData<Data>
+/// }
+///
+/// impl<Data> TransportConfiguration<Data> for ExampleTransportConfig<Data> {
+///
+///     fn new(set_bind_net_addr: String) -> Result<Self, Error> where
+///         Self: Sized {
+///
+///         let listener = TcpListener::bind(set_bind_net_addr.clone())?;
+///
+///         Ok(ExampleTransportConfig {
+///             bind_net_addr: set_bind_net_addr,
+///             listener,
+///             data: PhantomData
+///         })
+///     }
+///
+///     fn set_bind_net_addr(&mut self,address: String) -> Result<(), Error> {
+///
+///         self.bind_net_addr = address;
+///
+///         let listener = TcpListener::bind(self.bind_net_addr.clone()).unwrap();
+///
+///         drop(mem::replace(&mut self.listener, listener));
+///         Ok(())
+///     }
+/// }
+/// ```
 pub trait TransportConfiguration<Data> {
-    // creates new transport configuration with specified network
-    // address for incoming messages listener
+
+    /// Creates a new configuration with a specified network, taking the address of the incoming
+    /// messages listener.
+    /// Requires a network address as a String.
+    /// For an example of an implementation of this function, check the libtransport.tcp repository.
     fn new(set_bind_net_addr: String) -> Result<Self>
     where
         Self: Sized;
 
-    // set bind network address for incoming messages listener
+    /// Binds the network address tor the incoming messages listener
     fn set_bind_net_addr(&mut self, address: String) -> Result<()>;
 }
 
