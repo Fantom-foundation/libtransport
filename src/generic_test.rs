@@ -139,7 +139,7 @@ pub fn common_test<
     for i in 0..n_peers {
         pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
             .unwrap();
-        trns.push(T::new(net_addrs[i].clone()));
+        trns.push(T::new(net_addrs[i].clone()).unwrap());
     }
 
     // Wait three seconds.

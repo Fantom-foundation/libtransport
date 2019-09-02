@@ -71,7 +71,7 @@ where
     Data: Serialize + DeserializeOwned,
 {
     /// Creates a new Transport type using a preset configuration type.
-    fn new(set_bind_net_addr: String) -> Self
+    fn new(set_bind_net_addr: String) -> Result<Self>
     where
         Self: Sized;
 
