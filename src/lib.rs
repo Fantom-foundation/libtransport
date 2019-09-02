@@ -148,7 +148,7 @@ where
     Pl: PeerList<Id, Error>,
     Data: Serialize + DeserializeOwned,
 {
-    type Configuration: TransportConfiguration<Data>;
+    type Configuration: ?Sized; //TransportConfiguration<Data>;
 
     /// Creates a new Transport type using a preset configuration type.
     fn new(cfg: Self::Configuration) -> Self
