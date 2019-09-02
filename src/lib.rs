@@ -5,23 +5,7 @@
 /// functionality. If you want a specific implementation, please check the transport-tcp repo for a
 /// complete implementation: https://github.com/Fantom-foundation/libtransport-tcp.
 ///
-/// Currently, two traits are defined: TransportConfiguration and Transport.
-///
-/// # TransportConfiguration
-///
-/// Currently the TransportConfiguration trait requires the definition of a type: Data. Data can
-/// be of any type which needs to be transmitted across the network. An example of a 'Data'
-/// definition can be:
-///
-/// ```
-/// // An arbritrary data type which should be transmitted across the network
-/// pub struct Data(pub u32);
-///
-/// ```
-/// This trait also comes with two functions which need to be implemented: 'new' and
-/// 'set_bind_net_addr'. These will be addressed below.
-///
-/// A transport configuration is essential for the Transport trait to function properly.
+/// Currently only one trait is defined: Transport.
 ///
 /// # Transport
 ///
@@ -43,7 +27,6 @@
 /// <b>Error:</b> An error type that can be returned by implementations of the 'PeerList' trait
 /// <b>Pl:</b> A struct which implementes the PeerList trait (defined in the libcommon repo:
 /// https://github.com/Fantom-foundation/libcommon-rs )
-/// <b>Configuration:</b> The TransportConfiguration type required to make the function work.
 ///
 /// Finally, the Transport trait implements three methods: 'new', 'send', and 'broadcast'. The trait
 /// also requires an implementation of the 'Stream' trait from the async/.await framework (only
@@ -67,65 +50,6 @@ pub enum TransportType {
     TCP,
 }
 
-/// The TransportConfiguration trait - used to configure the transmission and protocol type.
-///
-/// # Examples
-/// ```
-/// use std::net::TcpListener;
-/// use libtransport::TransportConfiguration;
-/// use crate::libtransport::errors::Error;
-/// use serde::export::PhantomData;
-/// use core::mem;
-///
-/// pub struct Data(pub u32);
-///
-/// pub struct ExampleTransportConfig<Data> {
-///
-///     bind_net_addr: String,
-///     listener : TcpListener,
-///     data : PhantomData<Data>
-/// }
-///
-/// impl<Data> TransportConfiguration<Data> for ExampleTransportConfig<Data> {
-///
-///     // Creates a new configuration type and binds the given address to a listener
-///     fn new(set_bind_net_addr: String) -> Result<Self, Error> where
-///         Self: Sized {
-///
-///         let listener = TcpListener::bind(set_bind_net_addr.clone())?;
-///
-///         Ok(ExampleTransportConfig {
-///             bind_net_addr: set_bind_net_addr,
-///             listener,
-///             data: PhantomData
-///         })
-///     }
-///
-///     // Used to change the listener address. Binds input address to a new listener
-///     fn set_bind_net_addr(&mut self,address: String) -> Result<(), Error> {
-///
-///         self.bind_net_addr = address;
-///
-///         let listener = TcpListener::bind(self.bind_net_addr.clone()).unwrap();
-///
-///         drop(mem::replace(&mut self.listener, listener));
-///         Ok(())
-///     }
-/// }
-/// ```
-pub trait TransportConfiguration<Data> {
-    /// Creates a new configuration with a specified network, taking the address of the incoming
-    /// messages listener.
-    /// Requires a network address as a String.
-    /// For an example of an implementation of this function, check the libtransport-tcp repository.
-    fn new(set_bind_net_addr: String) -> Result<Self>
-    where
-        Self: Sized;
-
-    /// Binds the network address tor the incoming messages listener
-    fn set_bind_net_addr(&mut self, address: String) -> Result<()>;
-}
-
 /// Transport trait allows us to create multiple message sending/receiving services which share
 /// similar functionality.
 ///
@@ -147,7 +71,7 @@ where
     Data: Serialize + DeserializeOwned,
 {
     /// Creates a new Transport type using a preset configuration type.
-    fn new(cfg: &dyn TransportConfiguration<Data>) -> Self
+    fn new(set_bind_net_addr: String) -> Self
     where
         Self: Sized;
 

@@ -7,7 +7,7 @@
 /// The common_test method allows us to quickly test the new(), send(), and broadcast() methods and
 /// (hopefully) verifies that they work.
 use crate::errors::{Error, Error::AtMaxVecCapacity};
-use crate::{Transport, TransportConfiguration};
+use crate::Transport;
 use core::slice::{Iter, IterMut};
 use futures::executor::block_on;
 use futures::stream::StreamExt;
@@ -124,7 +124,7 @@ impl PeerList<Id, Error> for TestPeerList<Id> {
     send/receive data to one another.
 */
 pub fn common_test<
-    C: TransportConfiguration<Data>,
+    //    C: TransportConfiguration<Data>,
     T: Transport<Id, Data, Error, TestPeerList<Id>>,
 >(
     net_addrs: Vec<String>,
@@ -137,10 +137,9 @@ pub fn common_test<
     // Iterate over all peers, create a config for each one and create a Transport to handle
     // messaging.
     for i in 0..n_peers {
-        let config: &dyn TransportConfiguration<Data> = &(C::new(net_addrs[i].clone()).unwrap());
         pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
             .unwrap();
-        trns.push(T::new(config));
+        trns.push(T::new(net_addrs[i].clone()));
     }
 
     // Wait three seconds.
