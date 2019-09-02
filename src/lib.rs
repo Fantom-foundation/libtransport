@@ -134,10 +134,8 @@ pub trait TransportConfiguration<Data> {
 /// Data: The data being transmitted.
 /// Error: An error returned by the PeerList trait
 /// Pl: A list of Peers (PeerList trait struct)
-///  also an associated type should be defined
-/// Configuration: A struct implementing TransportConfiguration
 ///
-/// NOTE: TCP Transport should implement Stream in order for this to be accepted.
+/// NOTE: Transport must implement Stream trait from async/.await framework.
 ///
 /// For an example of how this trait can be implemented, please look at the libtransport-tcp
 /// repository: https://github.com/Fantom-foundation/libtransport-tcp
@@ -148,10 +146,8 @@ where
     Pl: PeerList<Id, Error>,
     Data: Serialize + DeserializeOwned,
 {
-    type Configuration: ?Sized; //TransportConfiguration<Data>;
-
     /// Creates a new Transport type using a preset configuration type.
-    fn new(cfg: Self::Configuration) -> Self
+    fn new(cfg: &dyn TransportConfiguration<Data>) -> Self
     where
         Self: Sized;
 

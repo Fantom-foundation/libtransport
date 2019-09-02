@@ -125,7 +125,7 @@ impl PeerList<Id, Error> for TestPeerList<Id> {
 */
 pub fn common_test<
     C: TransportConfiguration<Data>,
-    T: Transport<Id, Data, Error, TestPeerList<Id>, Configuration = C>,
+    T: Transport<Id, Data, Error, TestPeerList<Id>>,
 >(
     net_addrs: Vec<String>,
 ) {
@@ -137,7 +137,7 @@ pub fn common_test<
     // Iterate over all peers, create a config for each one and create a Transport to handle
     // messaging.
     for i in 0..n_peers {
-        let config = C::new(net_addrs[i].clone()).unwrap();
+        let config: &dyn TransportConfiguration<Data> = &(C::new(net_addrs[i].clone()).unwrap());
         pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
             .unwrap();
         trns.push(T::new(config));
