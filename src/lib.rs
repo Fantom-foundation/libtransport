@@ -45,6 +45,7 @@ use std::marker::Unpin;
 /// An enum for identifying various Transport types. So far only the TCP variant has been identified
 /// and implemented.
 
+#[derive(Clone)]
 pub enum TransportType {
     Unknown,
     TCP,
