@@ -84,6 +84,43 @@ where
     fn broadcast(&mut self, peers: &mut Pl, data: Data) -> Result<()>;
 }
 
+/// Transport sender trait allows us to create multiple `Data` sending only services.
+/// `TransportSender` trait requires the same 4 parameter types as `Transport` trait above.
+pub trait TransportSender<Id, Data, Error, Pl>
+where
+    Id: PeerId,
+    Pl: PeerList<Id, Error>,
+    Data: Serialize,
+{
+    /// Creates a new Transport type using a preset configuration type.
+    fn new() -> Result<Self>
+    where
+        Self: Sized;
+
+    /// Sends a message of type 'Data' to the specified peer (as specified by an address)
+    fn send(&mut self, peer_address: String, data: Data) -> Result<()>;
+
+    /// Broadcasts a message of type 'Data' to all peers on the network. Requires a struct which
+    /// implements PeerList.
+    fn broadcast(&mut self, peers: &mut Pl, data: Data) -> Result<()>;
+}
+
+/// Transport receiver trait allows us to create multiple `Data` receiving only services.
+/// `TransportReceiver` trait requires the same 4 parameter types as `Transport` trait above.
+///
+/// NOTE: `TransportReceiver` must implement Stream trait from async/.await framework.
+pub trait TransportReceiver<Id, Data, Error, Pl>: Stream<Item = Data> + Drop + Unpin
+where
+    Id: PeerId,
+    Pl: PeerList<Id, Error>,
+    Data: DeserializeOwned,
+{
+    /// Creates a new Transport type using a preset configuration type.
+    fn new(set_bind_net_addr: String) -> Result<Self>
+    where
+        Self: Sized;
+}
+
 // Imports
 pub mod errors;
 pub mod generic_test;
