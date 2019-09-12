@@ -8,6 +8,7 @@
 /// (hopefully) verifies that they work.
 use crate::errors::{Error, Error::AtMaxVecCapacity};
 use crate::Transport;
+use core::fmt::Display;
 use core::slice::{Iter, IterMut};
 use futures::executor::block_on;
 use futures::stream::StreamExt;
@@ -27,6 +28,12 @@ pub struct Id(pub u32);
 impl From<usize> for Id {
     fn from(x: usize) -> Id {
         Id(x as u32)
+    }
+}
+
+impl Display for Id {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
