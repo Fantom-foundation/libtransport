@@ -6,7 +6,7 @@
 ///
 /// The common_test method allows us to quickly test the new(), send(), and broadcast() methods and
 /// (hopefully) verifies that they work.
-use crate::errors::{Error, Error::AtMaxVecCapacity};
+use crate::errors::{Error, Error::AtMaxVecCapacity, Result};
 use crate::Transport;
 use core::fmt::Display;
 use core::slice::{Iter, IterMut};
@@ -53,7 +53,7 @@ pub struct TestPeer<Id> {
 }
 
 // Implement the Peer trait for TestPeer.
-impl Peer<Id> for TestPeer<Id> {
+impl Peer<Id, Error> for TestPeer<Id> {
     // Create a new peer
     fn new(id: Id, addr: String) -> TestPeer<Id> {
         TestPeer {
@@ -72,6 +72,14 @@ impl Peer<Id> for TestPeer<Id> {
     }
     fn get_net_addr(&self, n: usize) -> String {
         self.net_addr[n].clone()
+    }
+    fn set_net_addr(&mut self, n: usize, addr: String) -> Result<()> {
+        if self.net_addr.len() == std::usize::MAX {
+            return Err(AtMaxVecCapacity);
+        }
+        // FIXME: insert panics in n > net_addr.len()
+        self.net_addr.insert(n, addr);
+        Ok(())
     }
 }
 
@@ -143,7 +151,7 @@ pub fn common_test<
     T: Transport<Id, Data, Error, TestPeerList<Id>>,
 >(
     net_addrs: Vec<String>,
-) -> Result<(), Error> {
+) -> Result<()> {
     let n_peers = net_addrs.len();
     // Create a new TestPeerList
     let mut pl: TestPeerList<Id> = TestPeerList::new();
