@@ -8,7 +8,6 @@
 /// (hopefully) verifies that they work.
 use crate::errors::{Error, Error::AtMaxVecCapacity};
 use crate::Transport;
-use core::fmt;
 use core::fmt::Display;
 use core::slice::{Iter, IterMut};
 use futures::executor::block_on;
