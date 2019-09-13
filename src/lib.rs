@@ -71,7 +71,7 @@ where
     Pl: PeerList<Id, Error>,
     Data: Serialize + DeserializeOwned,
 {
-    /// Creates a new Transport type using a preset configuration type.
+    /// Creates a new Transport type. Takes in a net address to be bound to a listener
     fn new(set_bind_net_addr: String) -> Result<Self>
     where
         Self: Sized;

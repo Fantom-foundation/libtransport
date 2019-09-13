@@ -16,6 +16,7 @@ use libcommon_rs::peer::{Peer, PeerList};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};
 use std::{thread, time};
+use core::fmt;
 
 // Dummy data struct. Simply uses a u32 for instantiation.
 #[derive(Clone, Debug, Deserialize, Serialize, Eq, Hash, PartialEq, PartialOrd, Ord)]
@@ -133,9 +134,9 @@ impl PeerList<Id, Error> for TestPeerList<Id> {
 pub fn common_test<
     //    C: TransportConfiguration<Data>,
     T: Transport<Id, Data, Error, TestPeerList<Id>>,
->(
+> (
     net_addrs: Vec<String>,
-) {
+) -> Result<(), Error> {
     let n_peers = net_addrs.len();
     // Create a new TestPeerList
     let mut pl: TestPeerList<Id> = TestPeerList::new();
@@ -144,9 +145,8 @@ pub fn common_test<
     // Iterate over all peers, create a config for each one and create a Transport to handle
     // messaging.
     for i in 0..n_peers {
-        pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))
-            .unwrap();
-        trns.push(T::new(net_addrs[i].clone()).unwrap());
+        pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))?;
+        trns.push(T::new(net_addrs[i].clone())?);
     }
 
     // Wait three seconds.
@@ -158,7 +158,7 @@ pub fn common_test<
     // Create Data to send.
     let d: Data = Data(55);
     // Broadcast data.
-    trns[0].broadcast(&mut pl, d.clone()).unwrap();
+    trns[0].broadcast(&mut pl, d.clone())?;
     for i in 0..n_peers {
         // Asynchronously check if all peers have received the message.
         block_on(async {
@@ -175,7 +175,7 @@ pub fn common_test<
     println!("Unicast test");
     let u: Data = Data(0xaa);
     // Send directed data between two peers.
-    trns[1].send(pl[0].net_addr.clone(), u.clone()).unwrap();
+    trns[1].send(pl[0].net_addr.clone(), u.clone())?;
     // Asynchronously check whether the receiver got the sent message.
     block_on(async {
         let n = trns[0].next().await;
@@ -184,4 +184,6 @@ pub fn common_test<
             None => panic!("unexpected None"),
         }
     });
+
+    Ok(())
 }
