@@ -76,12 +76,16 @@ where
     where
         Self: Sized;
 
-    /// Sends a message of type 'Data' to the specified peer (as specified by an address)
+    /// Sends a message of type 'Data' to the specified peer (as specified by `peer_address`)
     fn send(&mut self, peer_address: String, data: Data) -> Result<()>;
 
-    /// Broadcasts a message of type 'Data' to all peers on the network. Requires a struct which
-    /// implements PeerList.
+    /// Broadcasts a message of type 'Data' to all peers on the network using `base` address.
+    /// Requires a struct which implements PeerList.
     fn broadcast(&mut self, peers: &mut Pl, data: Data) -> Result<()>;
+
+    /// Broadcasts a message of type 'Data' to all peers on the network using nth address in `net_addr`.
+    /// Requires a struct which implements PeerList.
+    fn broadcast_n(&mut self, peers: &mut Pl, n: usize, data: Data) -> Result<()>;
 }
 
 /// Transport sender trait allows us to create multiple `Data` sending only services.
@@ -97,12 +101,16 @@ where
     where
         Self: Sized;
 
-    /// Sends a message of type 'Data' to the specified peer (as specified by an address)
+    /// Sends a message of type 'Data' to the specified peer (as specified by `peer_address`)
     fn send(&mut self, peer_address: String, data: Data) -> Result<()>;
 
-    /// Broadcasts a message of type 'Data' to all peers on the network. Requires a struct which
-    /// implements PeerList.
+    /// Broadcasts a message of type 'Data' to all peers on the network using `base` address.
+    /// Requires a struct which implements PeerList.
     fn broadcast(&mut self, peers: &mut Pl, data: Data) -> Result<()>;
+
+    /// Broadcasts a message of type 'Data' to all peers on the network using nth address in `net_addr`.
+    /// Requires a struct which implements PeerList.
+    fn broadcast_n(&mut self, peers: &mut Pl, n: usize, data: Data) -> Result<()>;
 }
 
 /// Transport receiver trait allows us to create multiple `Data` receiving only services.
