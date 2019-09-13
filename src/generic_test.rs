@@ -48,22 +48,30 @@ impl From<usize> for Data {
 // NOTE: This specific implementation is only for testing purposes.
 pub struct TestPeer<Id> {
     pub id: Id,
-    pub net_addr: String,
+    pub base_addr: String,
+    pub net_addr: Vec<String>,
 }
 
 // Implement the Peer trait for TestPeer.
 impl Peer<Id> for TestPeer<Id> {
     // Create a new peer
     fn new(id: Id, addr: String) -> TestPeer<Id> {
-        TestPeer { id, net_addr: addr }
+        TestPeer {
+            id,
+            base_addr: addr,
+            net_addr: Vec::with_capacity(1),
+        }
     }
     // Getter for the Id
     fn get_id(&self) -> Id {
         self.id.clone()
     }
-    // Getter for the inputted address
-    fn get_net_addr(&self) -> String {
-        self.net_addr.clone()
+    // Getter for the base network address
+    fn get_base_addr(&self) -> String {
+        self.base_addr.clone()
+    }
+    fn get_net_addr(&self, n: usize) -> String {
+        self.net_addr[n].clone()
     }
 }
 
@@ -174,7 +182,7 @@ pub fn common_test<
     println!("Unicast test");
     let u: Data = Data(0xaa);
     // Send directed data between two peers.
-    trns[1].send(pl[0].net_addr.clone(), u.clone())?;
+    trns[1].send(pl[0].base_addr.clone(), u.clone())?;
     // Asynchronously check whether the receiver got the sent message.
     block_on(async {
         let n = trns[0].next().await;
