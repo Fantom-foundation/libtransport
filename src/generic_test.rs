@@ -8,6 +8,7 @@
 /// (hopefully) verifies that they work.
 use crate::errors::{Error, Error::AtMaxVecCapacity};
 use crate::Transport;
+use core::fmt;
 use core::fmt::Display;
 use core::slice::{Iter, IterMut};
 use futures::executor::block_on;
@@ -16,7 +17,6 @@ use libcommon_rs::peer::{Peer, PeerList};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};
 use std::{thread, time};
-use core::fmt;
 
 // Dummy data struct. Simply uses a u32 for instantiation.
 #[derive(Clone, Debug, Deserialize, Serialize, Eq, Hash, PartialEq, PartialOrd, Ord)]
@@ -134,7 +134,7 @@ impl PeerList<Id, Error> for TestPeerList<Id> {
 pub fn common_test<
     //    C: TransportConfiguration<Data>,
     T: Transport<Id, Data, Error, TestPeerList<Id>>,
-> (
+>(
     net_addrs: Vec<String>,
 ) -> Result<(), Error> {
     let n_peers = net_addrs.len();
