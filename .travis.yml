@@ -1,6 +1,6 @@
 language: rust
 rust:
-  - latest
+  - nightly
 sudo: false
 
 # only cache cargo subcommand binaries and .so libs
@@ -43,11 +43,11 @@ script:
 
 matrix:
   include:
-    - rust: latest
+    - rust: nightly
       env: BUILD_FMT=1
-    - rust: latest
+    - rust: nightly
       env: CLIPPY=1
-    - rust: latest
+    - rust: nightly
       env: CARGO_TEST=1
       notifications:
         slack:
