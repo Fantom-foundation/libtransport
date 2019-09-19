@@ -37,6 +37,12 @@ impl Display for Id {
     }
 }
 
+impl Default for Id {
+    fn default() -> Id {
+        Id { 0: 0 }
+    }
+}
+
 // Allows a usize to be used for Data struct creation.
 impl From<usize> for Data {
     fn from(x: usize) -> Data {
