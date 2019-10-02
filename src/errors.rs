@@ -2,23 +2,30 @@
 ///
 /// This file simply defines a set of errors and error handling functionality for the Transport
 /// trait. THis simply allows us to convert any std::Error to a variant as described in libcommon.rs.
+use failure::Error as FailureError;
 use libcommon_rs::errors::Error as BaseError;
 use std::error::Error as StdError;
 use std::sync::{MutexGuard, PoisonError};
 
 /// Standard Error type as defiend by the std library.
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T> = std::result::Result<T, FailureError>;
 
 /// A set of enums to differentiate between different types of errors.
-#[derive(Debug)]
+#[derive(Debug, Fail)]
 pub enum Error {
+    #[fail(display = "Base Error: {:?}", 0)]
     Base(BaseError),
     // Indicating a vector reached max capacity and can not receive new element
+    #[fail(display = "Internal vector is at maximum capacity!")]
     AtMaxVecCapacity,
+    #[fail(display = "Bincode error: {:?}", 0)]
     Bincode(bincode::Error),
+    #[fail(display = "Io error: {:?}", 0)]
     Io(std::io::Error),
     // Indicating read/write operation was unable to read/write complete size of data
+    #[fail(display = "Incomplete!")]
     Incomplete,
+    #[fail(display = "Poison error: {:?}", 0)]
     PoisonError(String),
 }
 /// Allow errors to be converted from a standard error to a BaseError type.

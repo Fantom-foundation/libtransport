@@ -79,7 +79,7 @@ impl Peer<Id, Error> for TestPeer<Id> {
     fn get_net_addr(&self, n: usize) -> String {
         self.net_addr[n].clone()
     }
-    fn set_net_addr(&mut self, n: usize, addr: String) -> Result<()> {
+    fn set_net_addr(&mut self, n: usize, addr: String) -> std::result::Result<(), Error> {
         if self.net_addr.len() == std::usize::MAX {
             return Err(AtMaxVecCapacity);
         }

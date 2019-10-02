@@ -35,6 +35,8 @@
 /// For further examples on how you can use the Transport trait, please look at the 'generic_test.rs'
 /// file for a simple implementation.
 ///
+#[macro_use]
+extern crate failure;
 use crate::errors::Result;
 use futures::stream::Stream;
 use libcommon_rs::peer::{PeerId, PeerList};
