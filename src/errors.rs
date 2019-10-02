@@ -4,7 +4,6 @@
 /// trait. THis simply allows us to convert any std::Error to a variant as described in libcommon.rs.
 use failure::Error as FailureError;
 use libcommon_rs::errors::Error as BaseError;
-use std::error::Error as StdError;
 use std::sync::{MutexGuard, PoisonError};
 
 /// Standard Error type as defiend by the std library.
