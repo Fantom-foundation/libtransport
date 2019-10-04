@@ -165,9 +165,9 @@ pub fn common_test<
     let mut trns: Vec<T> = Vec::with_capacity(n_peers);
     // Iterate over all peers, create a config for each one and create a Transport to handle
     // messaging.
-    for i in 0..n_peers {
-        pl.add(TestPeer::new(i.into(), net_addrs[i].clone()))?;
-        trns.push(T::new(net_addrs[i].clone())?);
+    for (i, net_addr) in net_addrs.iter().enumerate() {
+        pl.add(TestPeer::new(i.into(), net_addr.clone()))?;
+        trns.push(T::new(net_addr.clone())?);
     }
 
     // Wait three seconds.
@@ -180,11 +180,11 @@ pub fn common_test<
     let d: Data = Data(55);
     // Broadcast data.
     trns[0].broadcast(&mut pl, d.clone())?;
-    for i in 0..n_peers {
+    for (i, trn) in trns.iter_mut().enumerate() {
         // Asynchronously check if all peers have received the message.
         block_on(async {
             println!("receiving from peer {}", i);
-            let n = trns[i].next().await;
+            let n = trn.next().await;
             match n {
                 Some(t) => assert_eq!(d, t),
                 None => panic!("unexpected None"),
