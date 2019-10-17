@@ -33,65 +33,75 @@ $ cargo make
 ```
 
 ### Example ###
-```
+
+#### Prelude
+```rust
 use libtransport::TransportReceiver;
 use libtransport::TransportSender;
 use libtransport_tcp::receiver::TCPreceiver;
 use libtransport_tcp::sender::TCPsender;
+```
 
-...
 
-    let (transport_type, reply_bind_address) = {
-        let cfg = config.read().unwrap();
-        (cfg.transport_type.clone(), cfg.reply_addr.clone())
-    };
-    // setup TransportSender for Sync Request.
-    let mut sync_req_sender = {
-        match transport_type {
-            libtransport::TransportType::TCP => {
-                TCPsender::<P, SyncReq<P>, errors::Error, peer::DAGPeerList<P, PK>>::new().unwrap()
-            }
-            libtransport::TransportType::HTTP => {
-                HTTPsender::<P, SyncReq<P>, errors::Error, peer::DAGPeerList<P, PK>>::new().unwrap()
-            }
-            libtransport::TransportType::Unknown => panic!("unknown transport"),
+#### Step-by-step
+
+**Prepare configuration**
+```rust
+let (transport_type, reply_bind_address) = {
+    let cfg = config.read().unwrap();
+    (cfg.transport_type.clone(), cfg.reply_addr.clone())
+};
+```
+
+**setup `TransportSender` for `Sync` `Request`.**
+```rust
+let mut sync_req_sender = {
+    match transport_type {
+        libtransport::TransportType::TCP => {
+            TCPsender::<P, SyncReq<P>, errors::Error, peer::DAGPeerList<P, PK>>::new().unwrap()
         }
-    };
-    let mut sync_reply_receiver = {
-        match transport_type {
-            libtransport::TransportType::TCP => {
-                let x: TCPreceiver<P, SyncReply<D, P, PK, Sig>, Error, DAGPeerList<P, PK>> =
-                    TCPreceiver::new(reply_bind_address).unwrap();
-                x
-            }
-            libtransport::TransportType::HTTP => {
-                let x: HTTPreceiver<P, SyncReply<D, P, PK, Sig>, Error, DAGPeerList<P, PK>> =
-                    TCPreceiver::new(reply_bind_address).unwrap();
-                x
-            }
-            libtransport::TransportType::Unknown => panic!("unknown transport"),
+        libtransport::TransportType::HTTP => {
+            HTTPsender::<P, SyncReq<P>, errors::Error, peer::DAGPeerList<P, PK>>::new().unwrap()
         }
-    };
-
-    ...
-    // An example how to send data
-
-         match sync_req_sender.send(peer.request_addr, request) {
-            Ok(()) => {}
-            Err(e) => error!("error sending sync request: {:?}", e),
+        libtransport::TransportType::Unknown => panic!("unknown transport"),
+    }
+};
+let mut sync_reply_receiver = {
+    match transport_type {
+        libtransport::TransportType::TCP => {
+            let x: TCPreceiver<P, SyncReply<D, P, PK, Sig>, Error, DAGPeerList<P, PK>> =
+                TCPreceiver::new(reply_bind_address).unwrap();
+            x
         }
+        libtransport::TransportType::HTTP => {
+            let x: HTTPreceiver<P, SyncReply<D, P, PK, Sig>, Error, DAGPeerList<P, PK>> =
+                TCPreceiver::new(reply_bind_address).unwrap();
+            x
+        }
+        libtransport::TransportType::Unknown => panic!("unknown transport"),
+    }
+};
+```
 
-    ...
-    // An example how to receive data
-         block_on(async {
-            if let Some(sync_reply) = sync_reply_receiver.next().await {
-                debug!(
-                    "{} Sync Reply from {}",
-                    sync_reply.to.clone(),
-                    sync_reply.from.clone()
-                );
-                // do processing here for sync_reply received
-            }
-        });
+**An example how to send data**
+```rust
+match sync_req_sender.send(peer.request_addr, request) {
+    Ok(()) => {}
+    Err(e) => error!("error sending sync request: {:?}", e),
+}
+```
+
+**An example how to receive data**
+```rust
+block_on(async {
+  if let Some(sync_reply) = sync_reply_receiver.next().await {
+      debug!(
+          "{} Sync Reply from {}",
+          sync_reply.to.clone(),
+          sync_reply.from.clone()
+      );
+      // do processing here for sync_reply received
+  }
+});
 
 ```
