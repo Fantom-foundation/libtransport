@@ -40,6 +40,8 @@ use libtransport::TransportReceiver;
 use libtransport::TransportSender;
 use libtransport_tcp::receiver::TCPreceiver;
 use libtransport_tcp::sender::TCPsender;
+use libtransport_http::receiver::HTTPreceiver;
+use libtransport_http::sender::HTTPsender;
 ```
 
 
