@@ -1,6 +1,6 @@
 [package]
 name = "libtransport"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["Samuel Marks <@SamuelMarks>"]
 edition = "2018"
 

@@ -43,6 +43,7 @@ use libcommon_rs::peer::{PeerId, PeerList};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::marker::Unpin;
+use std::sync::mpsc::Sender;
 
 /// An enum for identifying various Transport types. So far only the TCP variant has been identified
 /// and implemented.
@@ -88,6 +89,9 @@ where
     /// Broadcasts a message of type 'Data' to all peers on the network using nth address in `net_addr`.
     /// Requires a struct which implements PeerList.
     fn broadcast_n(&mut self, peers: &mut Pl, n: usize, data: Data) -> Result<()>;
+
+    /// returns quit send channel
+    fn get_quit_tx(&self) -> Option<Sender<()>>;
 }
 
 /// Transport sender trait allows us to create multiple `Data` sending only services.
@@ -129,6 +133,9 @@ where
     fn new(set_bind_net_addr: String) -> Result<Self>
     where
         Self: Sized;
+
+    /// returns quit send channel
+    fn get_quit_tx(&self) -> Option<Sender<()>>;
 }
 
 // Imports
